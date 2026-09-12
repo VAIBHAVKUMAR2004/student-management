@@ -4,17 +4,31 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
-from database import engine, get_db
+from database import engine, get_db, SessionLocal
 
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
+
+# Add dummy courses if they don't exist
+db = SessionLocal()
+
+if db.query(models.Course).count() == 0:
+    db.add_all([
+        models.Course(course_name="Computer Science"),
+        models.Course(course_name="Information Technology")
+    ])
+    db.commit()
+
+db.close()
+
+
 # Create FastAPI application
 app = FastAPI(title="Student Management API")
 
 
-# CORS configuration
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
